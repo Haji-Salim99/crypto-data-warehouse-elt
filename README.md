@@ -39,6 +39,7 @@ VS Code
 ## Project Structure
 ---
 
+```
 crypto-data-warehouse-elt/
 │
 ├── dags/
@@ -76,7 +77,7 @@ crypto-data-warehouse-elt/
 ├── .gitignore
 └── README.md
 
-
+```
 
 ### Raw Table
 
