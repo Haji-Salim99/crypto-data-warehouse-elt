@@ -36,8 +36,9 @@ Requests
 python-dotenv
 Logging
 VS Code
-### Project Structure
+## Project Structure
 ---
+
 crypto-data-warehouse-elt/
 │
 ├── dags/
@@ -74,9 +75,10 @@ crypto-data-warehouse-elt/
 ├── .env
 ├── .gitignore
 └── README.md
----
 
-## Raw Table
+
+
+### Raw Table
 
 The first layer of the pipeline stores raw API data in PostgreSQL.
 
@@ -100,27 +102,21 @@ ingestion_timestamp
 1. Install dependencies
 pip install -r requirements.txt
 2. Add environment variables:
+3. Create.env file
+4. API_BASE_URL=https://api.coingecko.com/api/v3
+5. VS_CURRENCY=usd
+6. PER_PAGE=50
+7. PAGE=1
+8. DB_HOST=localhost
+9. DB_PORT=5432
+10. DB_NAME=crypto_dw
+11. DB_USER=postgres
+12. DB_PASSWORD=your_password
+13. Create the raw table
+14. Run the SQL in: sql/ddl/create_raw_table.sql
+15. Run the raw loading pipeline : python scripts/load_raw_to_postgres.py
 
-Create a .env file:
-API_BASE_URL=https://api.coingecko.com/api/v3
-VS_CURRENCY=usd
-PER_PAGE=50
-PAGE=1
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=crypto_dw
-DB_USER=postgres
-DB_PASSWORD=your_password
-
-3. Create the raw table
-
-Run the SQL in:
-sql/ddl/create_raw_table.sql
-
-4. Run the raw loading pipeline
-python scripts/load_raw_to_postgres.py
-
-## Next Steps
+### Next Steps
 Create dimension tables
 Create fact table
 Transform raw data inside PostgreSQL
