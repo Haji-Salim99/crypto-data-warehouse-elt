@@ -36,7 +36,7 @@ if not logger.handlers:
     logger.addHandler(file_handler)
     logger.addHandler(stream_handler)
 
-
+# Function to create a database engine
 def get_db_engine():
     db_host = os.getenv("DB_HOST")
     db_port = os.getenv("DB_PORT", "5432")
@@ -56,7 +56,7 @@ def get_db_engine():
     logger.info("Creating PostgreSQL database engine.")
     return create_engine(db_url)
 
-
+# Function to load raw data into PostgreSQL
 def load_raw_data():
     try:
         logger.info("Starting raw data load process.")
