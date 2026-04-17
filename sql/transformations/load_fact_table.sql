@@ -35,4 +35,6 @@ JOIN dim_market_cap_category dmc
         WHEN r.market_cap > 10000000000 THEN 'Large Cap'
         WHEN r.market_cap BETWEEN 1000000000 AND 10000000000 THEN 'Mid Cap'
         ELSE 'Small Cap'
-    END;
+    END
+    
+ON CONFLICT (coin_key, snapshot_timestamp) DO NOTHING;
