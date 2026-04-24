@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: crypto_dw_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1099
+      POSTGRES_DB: crypto_dw
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/ddl:/docker-entrypoint-initdb.d
+
+  pipeline:
+    build: .
+    container_name: crypto_dw_pipeline
+    depends_on:
+      - postgres
+    restart: no
+
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: crypto_dw
+      DB_USER: postgres
+      DB_PASSWORD: 1099
+
+      API_BASE_URL: https://api.coingecko.com/api/v3
+      VS_CURRENCY: usd
+      PER_PAGE: "50"
+      PAGE: "1"
+
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+      - ./data:/app/data
+
+    command: python scripts/run_elt_pipeline.py
+
+volumes:
+  postgres_data:

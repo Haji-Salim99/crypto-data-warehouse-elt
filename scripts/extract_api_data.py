@@ -2,6 +2,7 @@ import os
 import json
 import requests
 import logging
+import time
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
@@ -56,19 +57,26 @@ def extract_crypto_data() -> list:
         "sparkline": "false"
     }
 
-    try:
-        logger.info("Fetching data from CoinGecko API...")
-        response = requests.get(endpoint, params=params, timeout=30)
-        response.raise_for_status()
+    max_retries = 5
 
-        data = response.json()
-        logger.info(f"Successfully fetched {len(data)} records from API.")
-        return data
-    
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error fetching data from API: {e}")
-        raise
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(endpoint, params=params)
+            
+            if response.status_code == 429:
+                wait_time = 2 ** attempt
+                print(f"Rate limited. Retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+                continue
 
+            response.raise_for_status()
+            return response.json()
+
+        except requests.exceptions.RequestException as e:
+            print(f"Error: {e}")
+            time.sleep(2)
+
+    raise Exception("Failed to fetch data after retries")
 
 # Function to save raw data to file
 def save_raw_json(data:list) -> Path:

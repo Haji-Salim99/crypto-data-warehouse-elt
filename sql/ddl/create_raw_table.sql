@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS raw_crypto_market_data(
     high_24h NUMERIC,
     low_24h NUMERIC,
     price_change_24h NUMERIC,
+    price_change_percentage_24h NUMERIC,
     snapshot_timestamp timestamp,
     ingestion_timestamp timestamp DEFAULT CURRENT_TIMESTAMP
 )

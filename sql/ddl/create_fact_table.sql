@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS fact_crypto_snapshot (
         FOREIGN KEY (date_key) REFERENCES dim_date (date_key),
 
     CONSTRAINT fk_category
-        FOREIGN KEY (category_key) REFERENCES dim_market_cap_category (category_key)
-    
+        FOREIGN KEY (category_key) REFERENCES dim_market_cap_category (category_key),
+        
+        CONSTRAINT uq_coin_snapshot UNIQUE (coin_key, snapshot_timestamp)
 );
