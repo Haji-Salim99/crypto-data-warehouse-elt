@@ -39,4 +39,4 @@ services:
     command: python scripts/run_elt_pipeline.py
 
 volumes:
-  postgres_data:
+  postgres_data:  
