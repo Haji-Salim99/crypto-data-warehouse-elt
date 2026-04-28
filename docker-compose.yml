@@ -1,3 +1,4 @@
+
 services:
   postgres:
     image: postgres:15
@@ -12,14 +13,26 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  pipeline:
-    build: .
-    container_name: crypto_dw_pipeline
+  redis:
+    image: redis:7
+    container_name: airflow_redis
+    restart: always
+
+  airflow-webserver:
+    image: apache/airflow:2.9.0
+    container_name: airflow_webserver
+    restart: always
     depends_on:
       - postgres
-    restart: no
-
+      - redis
     environment:
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:1099@postgres:5432/crypto_dw
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://postgres:1099@postgres:5432/crypto_dw
+      AIRFLOW__CORE__FERNET_KEY: ''
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+
       DB_HOST: postgres
       DB_PORT: "5432"
       DB_NAME: crypto_dw
@@ -32,11 +45,81 @@ services:
       PAGE: "1"
 
     volumes:
+      - ./dags:/opt/airflow/dags
       - .:/app
-      - ./logs:/app/logs
+      - ./logs:/opt/airflow/logs
       - ./data:/app/data
 
-    command: python scripts/run_elt_pipeline.py
+    ports:
+      - "8080:8080"
+
+    command: webserver
+
+  airflow-scheduler:
+    image: apache/airflow:2.9.0
+    container_name: airflow_scheduler
+    restart: always
+    depends_on:
+      - airflow-webserver
+    environment:
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:1099@postgres:5432/crypto_dw
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://postgres:1099@postgres:5432/crypto_dw
+      AIRFLOW__CORE__FERNET_KEY: ''
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: crypto_dw
+      DB_USER: postgres
+      DB_PASSWORD: 1099
+
+      API_BASE_URL: https://api.coingecko.com/api/v3
+      VS_CURRENCY: usd
+      PER_PAGE: "50"
+      PAGE: "1"
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - .:/app
+      - ./logs:/opt/airflow/logs
+      - ./data:/app/data
+
+    command: scheduler
+
+  airflow-worker:
+    image: apache/airflow:2.9.0
+    container_name: airflow_worker
+    restart: always
+    depends_on:
+      - airflow-webserver
+    environment:
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:1099@postgres:5432/crypto_dw
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://postgres:1099@postgres:5432/crypto_dw
+      AIRFLOW__CORE__FERNET_KEY: ''
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: crypto_dw
+      DB_USER: postgres
+      DB_PASSWORD: 1099
+
+      API_BASE_URL: https://api.coingecko.com/api/v3
+      VS_CURRENCY: usd
+      PER_PAGE: "50"
+      PAGE: "1"
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - .:/app
+      - ./logs:/opt/airflow/logs
+      - ./data:/app/data
+
+    command: celery worker
 
 volumes:
-  postgres_data:  
+  postgres_data:
