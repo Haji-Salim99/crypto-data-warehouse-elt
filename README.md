@@ -1,6 +1,7 @@
 # Crypto Data Warehouse ELT Pipeline
-
-![Project Structure](images/project structure.png)
+---
+![Project Structure](images/project_structure.png)
+---
 
 ## Project Overview
 
@@ -165,10 +166,10 @@ Run pipeline
 ## Dashboard (Power BI)
 
 The Power BI dashboard provides:
-1. KPI cards (market cap, volume)
-2. Top 10 cryptocurrencies
-3. Market trend over time
-4. Interactive filtering (coin + date)
+- KPI cards (market cap, volume)
+- Top 10 cryptocurrencies
+- Market trend over time
+- Interactive filtering (coin + date)
 
 ## Key Features
 - ELT pipeline architecture
