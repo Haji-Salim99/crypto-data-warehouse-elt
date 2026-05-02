@@ -1,136 +1,191 @@
-# Crypto Data Warehouse ELT
+# Crypto Data Warehouse ELT Pipeline
 
-A data engineering project for building a cryptocurrency data warehouse using PostgreSQL and ELT principles.
+![Power BI Dashboard](images/project_structure.png)
 
-## Project Goal
+## Project Overview
 
-This project focuses on moving from ETL to ELT by first loading raw cryptocurrency market data into PostgreSQL, then transforming it later inside the database for analytics and warehouse modeling.
+An end-to-end Data Engineering project that builds a complete ELT pipeline, data warehouse, orchestration system, and BI dashboard using real cryptocurrency market data.
 
-## Current Progress
+This project focuses on moving from ETL to ELT by first loading raw cryptocurrency market data into postgres database to perfom the transformation of raw API data into a fully structured analytics system using modern data engineering practices.
 
-### Completed so far
-- Created a new project structure for the data warehouse project
-- Set up PostgreSQL project database: `crypto_dw`
-- Created the raw table: `raw_crypto_market_data`
-- Built Python extraction script to fetch crypto market data from the CoinGecko API
-- Saved raw API responses as timestamped JSON files
-- Built Python loading script to insert raw data into PostgreSQL
-- Added logging to both terminal and log files
-- Configured environment variables using `.env`
+It follows an ELT (Extract → Load → Transform) approach where:
+Raw data is first loaded into the database
+Transformations are performed inside the warehouse
+Data is modeled into a Star Schema for analytics
 
-## Current Architecture
+## Problem Statement
+
+APIs like CoinGecko provide real-time crypto data, but:
+Data is unstructured and not analytics-ready
+No historical tracking by default
+Difficult to perform consistent reporting
+No centralized data warehouse
+
+## Solution Architecture
 
 CoinGecko API
-    ↓
+      ↓
 Python Extraction
-    ↓
+      ↓
 Raw JSON Backup
-    ↓
-PostgreSQL Raw Table
+      ↓
+PostgreSQL (Raw Layer)
+      ↓
+SQL Transformations (ELT)
+      ↓
+Star Schema (Warehouse)
+      ↓
+Airflow Orchestration
+      ↓
+Power BI Dashboard
+
+## Data Warehouse Design
+
+### Star Schema
+Fact Table
+fact_crypto_snapshot
+coin_key
+date_key
+category_key
+current_price
+market_cap
+total_volume
+snapshot_timestamp
+
+### Dimension Tables
+1. dim_coin
+coin_key
+coin_id
+coin_name
+symbol
+
+2. dim_date
+date_key
+full_date
+
+3. dim_market_cap_category
+category_key
+market_cap_category
+
+## Screenshots
+
+### Power BI Dashboard
+
+![Power BI Dashboard](images/powerbi.png)
+
+---
+
+### Apache Airflow DAG Graph
+
+![Airflow](images/airflow.png)
+
+---
+
+### Docker Services 
+
+![Docker](images/docker.png)
+
+---
 
 ## Tech Stack
 Python
 PostgreSQL
 SQLAlchemy
-Requests
-python-dotenv
+Docker
+Apache Airflow
+Microsoft Power BI Desktop
 Logging
-VS Code
+python-dotenv
+
 ## Project Structure
 ---
 
 ```
-crypto-data-warehouse-elt/
+crypto_data_warehouse_elt/
 │
 ├── dags/
 │   └── crypto_elt_dag.py
 │
 ├── scripts/
+│   ├── utils.py
 │   ├── extract_api_data.py
 │   ├── load_raw_to_postgres.py
-│   └── run_pipeline.py
+│   ├── create_tables.py
+│   ├── load_dimensions.py
+│   └── load_fact.py
 │
 ├── sql/
 │   ├── ddl/
-│   │   ├── create_raw_table.sql
-│   │   ├── create_dim_tables.sql
-│   │   └── create_fact_table.sql
-│   │
-│   ├── transformations/
-│   │   ├── staging.sql
-│   │   ├── load_dim_coin.sql
-│   │   ├── load_dim_date.sql
-│   │   ├── load_dim_category.sql
-│   │   └── load_fact_table.sql
-│   │
-│   └── analytics/
-│       ├── top_coins.sql
-│       ├── price_trend.sql
-│       └── volatility.sql
+│   └── transformations/
+│    └── analytics/
+│
+├── dahboard/
+│   └── Data Warehouse Analytics.pbix
+│
+├── screenshots/
+│   
 │
 ├── data/
-│   └── raw/
-│
 ├── logs/
+├── docker-compose.yml
 ├── requirements.txt
-├── .env
-├── .gitignore
 └── README.md
 
 ```
 
-### Raw Table
+## Pipeline Workflow (Airflow DAG)
 
-The first layer of the pipeline stores raw API data in PostgreSQL.
+The pipeline is automated using Airflow DAG containing:
+Create tables (DDL)
+Load raw data from API script
+Load dimension tables script
+Load fact table script
 
-Table: raw_crypto_market_data
+## Docker Setup
 
-Key columns:
-coin_id
-symbol
-coin_name
-current_price
-market_cap
-market_cap_rank
-total_volume
-high_24h
-low_24h
-price_change_24h
-price_change_percentage_24h
-snapshot_timestamp
-ingestion_timestamp
-### How to Run
-1. Install dependencies
-pip install -r requirements.txt
-2. Add environment variables:
-3. Create.env file
-4. API_BASE_URL=https://api.coingecko.com/api/v3
-5. VS_CURRENCY=usd
-6. PER_PAGE=50
-7. PAGE=1
-8. DB_HOST=localhost
-9. DB_PORT=5432
-10. DB_NAME=crypto_dw
-11. DB_USER=postgres
-12. DB_PASSWORD=your_password
-13. Create the raw table
-14. Run the SQL in: sql/ddl/create_raw_table.sql
-15. Run the raw loading pipeline : python scripts/load_raw_to_postgres.py
+The system runs using Docker:
+PostgreSQL container (data warehouse)
+Airflow containers (scheduler + webserver)
+Pipeline container
 
-### Next Steps
-Create dimension tables
-Create fact table
-Transform raw data inside PostgreSQL
-Build star schema
-Write analytics queries
-Connect warehouse to Power BI
-Add orchestration with Airflow
-Learning Focus
+## How to Run
 
-### This project is helping me practice:
-ELT pipeline design
-raw data ingestion
-PostgreSQL-based warehouse design
-SQL transformations
-data modeling with fact and dimension tables
-production-style project structure
+1. Start services
+docker-compose up --build
+
+2. Access Airflow UI
+Access Airflow UI
+
+3. Trigger DAG
+Enable DAG
+Run pipeline
+
+## Dashboard (Power BI)
+
+The Power BI dashboard provides:
+KPI cards (market cap, volume)
+Top 10 cryptocurrencies
+Market trend over time
+Interactive filtering (coin + date)
+
+## Key Features
+ELT pipeline architecture
+Star schema data modeling
+Automated workflow with Airflow
+Containerized environment with Docker
+Interactive BI dashboard
+
+## Future Improvements
+Add dbt for transformation management
+Deploy to cloud (AWS/GCP)
+Implement real-time streaming pipeline
+Add data quality checks
+
+## Learning Outcomes
+
+This project demonstrates:
+End-to-end data engineering workflow
+Data warehouse design principles
+ELT vs ETL approach
+Workflow orchestration
+BI integration
